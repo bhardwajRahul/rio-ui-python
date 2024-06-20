@@ -35,7 +35,7 @@ _AUTO_LINK_REGEX = re.compile(r"`(?:rio\.)?([a-zA-Z_.]+)`(?!\])")
 
 
 def insert_links_into_markdown(
-    markdown: str, *, own_name: str | None = None
+    markdown: str, *, ignored_names: Container[str] = ()
 ) -> str:
     """
     Turns markdown like
@@ -46,9 +46,9 @@ def insert_links_into_markdown(
 
         [`Row`](/docs/api/row)
 
-    The `own_name` parameter can be used to prevent a page from linking to
-    itself. For example, in the documentation for `Row`, we don't want every
-    occurrence of `Row` to turn into a link.
+    The `ignored_names` parameter can be used to prevent a page/section from
+    linking to itself. For example, in the documentation for `Label.text`,
+    occurrences of `Label` and `Label.text` don't need to be turned into links.
     """
     global _NAME_TO_URL
 
@@ -67,7 +67,7 @@ def insert_links_into_markdown(
     def repl(match: re.Match) -> str:
         name = match.group(1)
 
-        if name != own_name:
+        if name not in ignored_names:
             try:
                 url = name_to_url[name]
             except KeyError:
@@ -323,12 +323,12 @@ def postprocess_docs(
 def postprocess_function_docs(docs: imy.docstrings.FunctionDocs) -> None:
     if docs.summary is not None:
         docs.summary = insert_links_into_markdown(
-            docs.summary, own_name=docs.name
+            docs.summary, ignored_names=[docs.name]
         )
 
     if docs.details is not None:
         docs.details = insert_links_into_markdown(
-            docs.details, own_name=docs.name
+            docs.details, ignored_names=[docs.name]
         )
 
     # Post-process the parameters
@@ -336,7 +336,7 @@ def postprocess_function_docs(docs: imy.docstrings.FunctionDocs) -> None:
         if param_docs.description:
             param_docs.description = insert_links_into_markdown(
                 param_docs.description,
-                own_name=f"{docs.name}.{param_docs.name}",
+                ignored_names=[docs.name, f"{docs.name}.{param_docs.name}"],
             )
 
 
@@ -361,12 +361,12 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
     # Inserts links to other documentation
     if docs.summary is not None:
         docs.summary = insert_links_into_markdown(
-            docs.summary, own_name=docs.name
+            docs.summary, ignored_names=[docs.name]
         )
 
     if docs.details is not None:
         docs.details = insert_links_into_markdown(
-            docs.details, own_name=docs.name
+            docs.details, ignored_names=[docs.name]
         )
 
     # Strip internal attributes
@@ -391,7 +391,8 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         # Insert links to other documentation pages
         if prop.description is not None:
             prop.description = insert_links_into_markdown(
-                prop.description, own_name=f"{docs.name}.{prop.name}"
+                prop.description,
+                ignored_names=[docs.name, f"{docs.name}.{prop.name}"],
             )
 
     # Strip internal properties
@@ -417,12 +418,14 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
 
             if func.summary is not None:
                 func.summary = insert_links_into_markdown(
-                    func.summary, own_name=f"{docs.name}.{prop.name}"
+                    func.summary,
+                    ignored_names=[docs.name, f"{docs.name}.{prop.name}"],
                 )
 
             if func.details is not None:
                 func.details = insert_links_into_markdown(
-                    func.details, own_name=f"{docs.name}.{prop.name}"
+                    func.details,
+                    ignored_names=[docs.name, f"{docs.name}.{prop.name}"],
                 )
 
     # Skip internal functions
@@ -501,12 +504,14 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
         # Insert links to other documentation pages
         if func_docs.summary is not None:
             func_docs.summary = insert_links_into_markdown(
-                func_docs.summary, own_name=f"{docs.name}.{func_docs.name}"
+                func_docs.summary,
+                ignored_names=[docs.name, f"{docs.name}.{func_docs.name}"],
             )
 
         if func_docs.details is not None:
             func_docs.details = insert_links_into_markdown(
-                func_docs.details, own_name=f"{docs.name}.{func_docs.name}"
+                func_docs.details,
+                ignored_names=[docs.name, f"{docs.name}.{func_docs.name}"],
             )
 
         # Post-process the parameters
@@ -514,7 +519,11 @@ def postprocess_class_docs(docs: imy.docstrings.ClassDocs) -> None:
             if param_docs.description:
                 param_docs.description = insert_links_into_markdown(
                     param_docs.description,
-                    own_name=f"{docs.name}.{func_docs.name}.{param_docs.name}",
+                    ignored_names=[
+                        docs.name,
+                        f"{docs.name}.{func_docs.name}",
+                        f"{docs.name}.{func_docs.name}.{param_docs.name}",
+                    ],
                 )
 
 
