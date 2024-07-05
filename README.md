@@ -102,7 +102,7 @@ experience. If you have any feedback, please let us know on [our Discord server]
 
 **Every project thrives with a helping hand**, and that's especially true for Rio. **There are lots of ways to jump in**, like adding new features, fixing bugs, or just sharing your ideas.
 Check out our [Contributing Guide](https://github.com/rio-labs/rio/blob/dev/CONTRIBUTING.md) when submitting a Pull Request to the project.
-Rio keeps getting better with new features rolling out every week. **Star ⭐ and 👀 watch this repo to stay in the loop!**
+Rio keeps getting better with new features rolling out every week. **Star ⭐ and 👀 watch this repo to stay in the loop!** 
 
 ## Community Support 🫶
 
